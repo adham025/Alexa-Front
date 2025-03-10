@@ -1,8 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/fresh.png";
-import { UserContext } from "../../Context/userContext";
 import { useContext } from "react";
-
+import { UserContext } from "../../Context/UserContext";
 export default function Navbar() {
   let { userToken, setUserToken } = useContext(UserContext);
   let navigate = useNavigate();
