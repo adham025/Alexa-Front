@@ -5,24 +5,21 @@ export const CartContext = createContext();
 
 export default function CartContextProvider({ children }) {
   const [cart, setCart] = useState([]);
-
   const getToken = () => localStorage.getItem("userToken");
 
-  // useEffect(() => {
-  //   // console.log("Stored Token:", getToken());
-  // }, []);
-
-  const createHeaders = () => ({
+const createHeaders = () => {
+  const token = getToken();
+  if (!token) {
+    return {}; 
+  }
+  return {
     headers: {
-      Authorization: `Bearer__${getToken()}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-  });
-  
+  };
+};
 
-  // useEffect(() => {
-  //   console.log("Auth:", createHeaders());
-  // }, []);
   
   async function addToCart(bikeId, setCart) {
     try {
@@ -30,17 +27,12 @@ export default function CartContextProvider({ children }) {
       let payload = {
         bikes: [{ bikeId }],
       };
-
-      // console.log("Sending Cart Data:", payload);
-      // console.log("Headers being sent:", headers);
-
       let { data } = await axios.post(
         "https://alexa-back-production.up.railway.app/api/v1/cart/add",
         payload,
         createHeaders() 
       );
       
-      // console.log("Cart Response:", data);
       setCart(data.cart.bikes);
       return data;
     } catch (error) {
@@ -51,17 +43,26 @@ export default function CartContextProvider({ children }) {
   async function getLoggedUserCart() {
     try {
       const headers = createHeaders();
+      if (Object.keys(headers).length === 0) {
+        return; 
+      }
+  
       let { data } = await axios.get(
         `https://alexa-back-production.up.railway.app/api/v1/cart/all`,
-        createHeaders() 
+        headers
       );
       setCart(data?.cart?.bikes || []);
       return data;
     } catch (error) {
       console.error("Error fetching cart:", error.response?.data || error.message);
-      return { success: false, message: "Failed to fetch cart", error: error.response?.data || error.message };
+      return {
+        success: false,
+        message: "Failed to fetch cart",
+        error: error.response?.data || error.message,
+      };
     }
   }
+  
 
   async function removeFromCart (id) {
     try {

@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useMemo } from "react";
 
 export const UserContext = createContext();
 UserContext.displayName = "UserContext";
@@ -13,8 +13,19 @@ export default function UserContextProvider({ children }) {
     }
   }, []);
 
+  const setToken = (token) => {
+    setUserToken(token);
+    if (token) {
+      localStorage.setItem("userToken", token);
+    } else {
+      localStorage.removeItem("userToken");
+    }
+  };
+
+  const contextValue = useMemo(() => ({ userToken, setToken }), [userToken]);
+
   return (
-    <UserContext.Provider value={{ userToken, setUserToken }}>
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );
